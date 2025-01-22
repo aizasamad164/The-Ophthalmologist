@@ -1,171 +1,982 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
 
-# C extensions
-*.so
 
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
+import sys
+from customtkinter import CTkLabel, CTkImage, CTkEntry, CTkButton
+import tkinter as tk
+import customtkinter as ctk
+from tkinter import messagebox
+import pyodbc
+from PIL import Image
 
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
+m = ctk.CTk(fg_color="#B7A8D9")
 
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
+m.geometry("1400x1000")
+ctk.set_appearance_mode("light")
 
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.py,cover
-.hypothesis/
-.pytest_cache/
-cover/
 
-# Translations
-*.mo
-*.pot
+def new_window():
 
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
+    # checking the password before switching frames
+    val = txt1.get()
+    print(val)
+    if val == '123':
 
-# Flask stuff:
-instance/
-.webassets-cache
+        dict = {'Name': '', 'Address': '', 'Age': '', 'Job': '', 'Phone_Number': '', 'Personal': [], 'Genetic': [], 'Medications': [], 'Complains': [], 'Drug': [], 'Eye': [], 'Pain': [5]}
 
-# Scrapy stuff:
-.scrapy
+        def result():
+            # retrieving data from the database
+            conn = pyodbc.connect((r'DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};'
+                                   r'DBQ=C:\Aiza-NED\Programming_Fundamentals\Eye_Clinic[1].accdb;'))
 
-# Sphinx documentation
-docs/_build/
+            cur = conn.cursor()
 
-# PyBuilder
-.pybuilder/
-target/
+            val = dict['Phone_Number']
 
-# Jupyter Notebook
-.ipynb_checkpoints
+            # taking a formatted value of the MR_Number
+            query = "SELECT MR_Number FROM MR_Number WHERE Phone_Number = ?"
 
-# IPython
-profile_default/
-ipython_config.py
+            cur.execute(query, (dict['Phone_Number'],))
+            data1 = cur.fetchone()
+            cur.execute("SELECT Name FROM Per_Inf WHERE Phone_Number = ?", (val,))
+            data2 = cur.fetchone()
+            cur.execute("SELECT Address FROM Per_Inf WHERE Phone_Number = ?", (val,))
+            data3 = cur.fetchone()
 
-# pyenv
-#   For a library or package, you might want to ignore these files since the code is
-#   intended to run in multiple environments; otherwise, check them in:
-# .python-version
+            val1 = data1
+            val2 = data2
+            val3 = data3
 
-# pipenv
-#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
-#   However, in case of collaboration, if having platform-specific dependencies or dependencies
-#   having no cross-platform support, pipenv may install dependencies that don't work, or not
-#   install all needed dependencies.
-#Pipfile.lock
+            conn.commit()
 
-# UV
-#   Similar to Pipfile.lock, it is generally recommended to include uv.lock in version control.
-#   This is especially recommended for binary packages to ensure reproducibility, and is more
-#   commonly ignored for libraries.
-#uv.lock
+            cur.close()
+            conn.close()
 
-# poetry
-#   Similar to Pipfile.lock, it is generally recommended to include poetry.lock in version control.
-#   This is especially recommended for binary packages to ensure reproducibility, and is more
-#   commonly ignored for libraries.
-#   https://python-poetry.org/docs/basic-usage/#commit-your-poetrylock-file-to-version-control
-#poetry.lock
+            list_l = []
 
-# pdm
-#   Similar to Pipfile.lock, it is generally recommended to include pdm.lock in version control.
-#pdm.lock
-#   pdm stores project-wide configurations in .pdm.toml, but it is recommended to not include it
-#   in version control.
-#   https://pdm.fming.dev/latest/usage/project/#working-with-version-control
-.pdm.toml
-.pdm-python
-.pdm-build/
+            # if conditions to determine the potential illnesses by using values in the dictionary, and the values
+            # determined from the pain scale and other factors stored in each frame
+            # mandatory to fill the personal history, complains and which eye to deliver diagnosis on
+            if len(dict['Complains']) == 0 or len(dict['Personal']) == 0 or len(dict['Eye']) == 0:
+                messagebox.showwarning("Input Error", "Please fill in all fields.")
+            else:
+                if (1 in dict['Pain'] or 2 in dict['Pain']) and ('Fall of curtains' in dict['Complains'
+                    ] or 'Slow vision loss' in dict['Complains'] or 'Slow vision loss' in dict['Complains'
+                    ] or 'Flashing light' in dict['Complains']):
+                    list_l.append('Retina Detachment')
 
-# PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm
-__pypackages__/
+                if (3 in dict['Pain'] or 4 in dict['Pain'] or 5 in dict['Pain']) and (
+                        'Fall of curtains' in dict['Complains'] or 'Sudden vision loss' in dict[
+                    'Complains'] or 'Watering' in dict['Complains']):
+                    list_l.append('Acute Glaucoma')
 
-# Celery stuff
-celerybeat-schedule
-celerybeat.pid
+                if (1 in dict['Pain'] or 2 in dict['Pain']) and ('Fall of curtains' in dict['Complains'
+                    ] or 'Sudden vision loss' in dict['Complains'] or 'Watering' in dict['Complains']):
+                    list_l.append('Chronic Glaucoma')
 
-# SageMath parsed files
-*.sage.py
+                if (1 in dict['Pain'] or 2 in dict['Pain']) and ('Sudden vision loss' in dict['Complains'
+                    ] or 'Slow vision loss' in dict['Complains']):
+                    list_l.append('Cataract')
 
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
+                if (3 in dict['Pain'] or 4 in dict['Pain'] or 5 in dict['Pain']) and (
+                        'Redness' in dict['Complains'] or 'Watering' in dict['Complains'] or 'Sticky Discharge' in dict[
+                    'Complains'] or 'No loss vision' in dict['Complains']):
+                    list_l.append('Conjuctivitas')
 
-# Spyder project settings
-.spyderproject
-.spyproject
+                if (3 in dict['Pain'] or 4 in dict['Pain'] or 5 in dict['Pain']) and (
+                        'No loss vision' in dict['Complains'] or 'Contact lens usage' in dict[
+                    'Complains'] or 'Foreign body' in dict['Complains']):
+                    list_l.append('Uses Contact Lens')
 
-# Rope project settings
-.ropeproject
+                if 3 in dict['Pain'] or 4 in dict['Pain'] or 5 in dict['Pain'
+                    ] and 'Sudden vision loss' in dict['Complains']:
+                    list_l.append('Chemical Injury')
 
-# mkdocs documentation
-/site
+                if 'Headache' in dict['Complains'] or 'Plus' in dict['Complains'] or 'Minus lens' in dict['Complains']:
+                    list_l.append('Refractive Error')
 
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
+                if 'Chemical in eye' in dict['Complains'] or 'Contact lens usage' in dict['Complains']:
+                    list_l.append('Corneal Abbcess')
 
-# Pyre type checker
-.pyre/
+                if 'Sudden vision loss' in dict['Complains'] and 'Diabetes' in dict['Genetic'] or 'Diabetes' in dict[
+                    'Personal']:
+                    list_l.append('Diabetes')
 
-# pytype static type analyzer
-.pytype/
+                if 'Sudden vision loss' in dict['Complains'] and 'Blood Pressure' in dict['Genetic'
+                    ] or 'Blood Pressure' in dict['Personal']:
+                    list_l.append('Blood Pressure')
 
-# Cython debug symbols
-cython_debug/
+                if 'Sudden vision loss' in dict['Complains'] and 'Diabetes' in dict['Genetic'] or 'Diabetes' in dict[
+                    'Personal']:
+                    list_l.append('Hypertensive Retinopathy')
 
-# PyCharm
-#  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
-#  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
-#  and can be added to the global gitignore or merged into this file.  For a more nuclear
-#  option (not recommended) you can uncomment the following to ignore the entire idea folder.
-#.idea/
+                if 'Sudden vision loss' in dict['Complains'] and 'Diabetes' in dict['Genetic'] or 'Diabetes' in dict[
+                    'Personal']:
+                    list_l.append('Diabetic Retinopathy')
 
-# PyPI configuration file
-.pypirc
+                if 'Any Allergies' in dict['Personal'] or 'Dry Eyes' in dict['Complains']:
+                    list_l.append('Allergies')
+
+                if 3 in dict['Pain'] or 4 in dict['Pain'] or 5 in dict['Pain']:
+                    list_l.append('Trauma')
+
+                if (1 in dict['Pain'] or 2 in dict['Pain']) and ('Arthralgia' in dict['Medications']):
+                    list_l.append('Arthritis')
+
+                if (1 in dict['Pain'] or 2 in dict['Pain']) and ('Macular Degeneration' in dict[
+                    'Genetic'] and 'Slow vision loss' in dict['Complains']):
+                    list_l.append('Macular Degeneration')
+
+                if (1 in dict['Pain'] or 2 in dict['Pain']) and ('Alcohol Usage' in dict['Medications']) and ('Slow vision loss' in dict[
+                    'Complains'] or 'Sudden vision loss' in dict['Complains'] or 'Dry eyes' in dict['Complains']):
+                    list_l.append('Macular Degeneration')
+
+                print(list_l)
+
+                m.withdraw()
+
+                # new window specifications
+                res_window = ctk.CTkToplevel(m)
+                res_window.title("New Window")
+                res_window.config(background='white')
+                res_window.geometry("1050x1000")
+
+                # setting and formatting the labels and other widgets on the result screen
+                second_image = CTkImage(light_image=Image.open(r"C:\project-PF\icon.png"),
+                                        dark_image=Image.open(r"C:\project-PF\icon.png"), size=(70, 50))
+                picture = CTkLabel(res_window, text="", image=second_image)
+                picture.grid(sticky='W', row=0, column=0, columnspan=2, padx=10)
+
+                per_inf = ctk.CTkLabel(res_window, text='Personal Information', font=('Arial', 30, 'bold'), bg_color='white')
+                per_inf.grid(sticky='W', row=1, column=0, columnspan=3, padx=10, pady=10)
+
+                mr = ctk.CTkLabel(res_window, text='MR #:  ' + str(val1[0]), font=('Arial', 15, 'bold'), bg_color='white')
+                mr.grid(sticky='W', row=2, column=0, padx=10)
+
+                age = ctk.CTkLabel(res_window, text='Age:  ' + f"{dict["Age"]}", font=('Arial', 15, 'bold'), bg_color='white')
+                age.grid(sticky='W', row=3, column=0, padx=10)
+
+                pn = ctk.CTkLabel(res_window, text='Phone #:', font=('Arial', 15, 'bold'), bg_color='white')
+                pn.grid(sticky='W', row=2, column=1)
+                pn = ctk.CTkLabel(res_window, text=f"{dict["Phone_Number"]}", font=('Arial', 15, 'bold'),
+                                  bg_color='white')
+                pn.grid(sticky='W', row=2, column=2)
+
+                occ = ctk.CTkLabel(res_window, text='Occupation:', font=('Arial', 15, 'bold'), bg_color='white')
+                occ.grid(sticky='W', row=3, column=1)
+                occ = ctk.CTkLabel(res_window, text=f"{dict["Job"]}", font=('Arial', 15, 'bold'),
+                                   bg_color='white')
+                occ.grid(sticky='W', row=3, column=2)
+
+                name = ctk.CTkLabel(res_window, text='Name:', font=('Arial', 15, 'bold'), bg_color='white')
+                name.grid(sticky='W', row=2, column=3)
+                name = ctk.CTkLabel(res_window, text=str(val2[0]), font=('Arial', 15, 'bold'), bg_color='white')
+                name.grid(sticky='W', row=2, column=4)
+
+                add = ctk.CTkLabel(res_window, text='Address:', font=('Arial', 15, 'bold'), bg_color='white')
+                add.grid(sticky='W', row=3, column=3)
+                add = ctk.CTkLabel(res_window, text=str(val3[0]), font=('Arial', 15, 'bold'), bg_color='white')
+                add.grid(sticky='W', row=3, column=4)
+
+                # Create a Canvas widget
+                canvas = tk.Canvas(res_window, width=1250, height=2, bg="dark blue")
+                canvas.grid(sticky='W', row=4, column=0, columnspan=8, padx=10)
+
+                # Draw a line on the Canvas
+                # Syntax: create_line(x1, y1, x2, y2, options)
+                # (x1, y1) and (x2, y2) are the start and end points of the line
+                canvas.create_line(50, 100, 350, 100, fill="dark blue", width=3)
+
+                per_his = ctk.CTkLabel(res_window, text='Personal History', font=('Arial', 25, 'bold'), bg_color='white')
+                per_his.grid(sticky='W', row=5, column=0, columnspan=2, padx=10, pady=20)
+
+                count1a = 0
+                count1b = 0
+                # count the items in the Personal array
+
+                for items in dict['Personal']:
+                    if count1a < 6:     # less than 6 will give one row
+                        label = tk.Label(res_window, text=items, font=('Arial', 15, 'bold'), background='white')
+                        label.grid(sticky='W', row=6, column=count1a, padx=10)
+                        count1a += 1
+                    elif count1b < 12:      # more than 6 and less than 12 will result in 2 rows
+                        label = tk.Label(res_window, text=items, font=('Arial', 15, 'bold'), background='white')
+                        label.grid(sticky='W', row=7, column=count1b, padx=10)
+                        count1b += 1
+
+                canvas = tk.Canvas(res_window, width=1250, height=2, bg="dark blue")
+                canvas.grid(sticky='W', row=8, column=0, columnspan=8, padx=10)
+                canvas.create_line(50, 100, 350, 100, fill="dark blue", width=3)
+
+                per_his = ctk.CTkLabel(res_window, text='Drug History', font=('Arial', 25, 'bold'), bg_color='white')
+                per_his.grid(sticky='W', row=9, column=0, columnspan=2, padx=10, pady=20)
+
+                count2 = 0
+                if len(dict['Medications']) == 0:
+                    label = tk.Label(res_window, text='None', font=('Arial', 15, 'bold'), background='white')
+                    label.grid(sticky='W', row=10, column=count2, padx=10)
+                else:
+                    for items in dict['Medications']:
+                        label = tk.Label(res_window, text=items, font=('Arial', 15, 'bold'), background='white')
+                        label.grid(sticky='W', row=10, column=count2, padx=10)
+                        count2 += 1
+
+                canvas = tk.Canvas(res_window, width=1250, height=2, bg="dark blue")
+                canvas.grid(sticky='W', row=11, column=0, columnspan=8, padx=10)
+                canvas.create_line(50, 100, 350, 100, fill="dark blue", width=3)
+
+                fam_his = ctk.CTkLabel(res_window, text='Family History', font=('Arial', 25, 'bold'), bg_color='white')
+                fam_his.grid(sticky='W', row=12, column=0, columnspan=2, padx=10, pady=20)
+
+                count3 = 0
+                if len(dict['Genetic']) == 0:
+                    label = tk.Label(res_window, text='None', font=('Arial', 15, 'bold'), background='white')
+                    label.grid(sticky='W', row=13, column=count3, padx=10)
+                else:
+                    for items in dict['Genetic']:
+                        label = tk.Label(res_window, text=items, font=('Arial', 15, 'bold'), background='white')
+                        label.grid(sticky='W', row=13, column=count3, padx=10)
+                        count3 += 1
+
+                canvas = tk.Canvas(res_window, width=1250, height=2, bg="dark blue")
+                canvas.grid(sticky='W', row=14, column=0, columnspan=8, padx=10)
+                canvas.create_line(50, 100, 350, 100, fill="dark blue", width=3)
+
+                complains = ctk.CTkLabel(res_window, text='Patient Complains', font=('Arial', 25, 'bold'), bg_color='white')
+                complains.grid(sticky='W', row=15, column=0, columnspan=2, padx=10, pady=20)
+
+                if len(dict['Eye']) == 2:
+                    label = tk.Label(res_window, text='Both eyes', font=('Arial', 15, 'bold'), background='white')
+                    label.grid(sticky='W', row=16, column=0, padx=10)
+                else:
+                    label = tk.Label(res_window, text=dict['Eye'][0], font=('Arial', 15, 'bold'), background='white')
+                    label.grid(sticky='W', row=16, column=0, padx=10)
+
+                count4a = 0
+                count4b = 0
+                count4c = 0
+                for items in dict['Complains']:
+                    if count4a < 6:
+                        label = tk.Label(res_window, text=items, font=('Arial', 15, 'bold'), background='white')
+                        label.grid(sticky='W', row=17, column=count4a, padx=10)
+                        count4a += 1
+                    elif count4b < 12:
+                        label = tk.Label(res_window, text=items, font=('Arial', 15, 'bold'), background='white')
+                        label.grid(sticky='W', row=18, column=count4b, padx=10)
+                        count4b += 1
+                    elif count4c < 14:
+                        label = tk.Label(res_window, text=items, font=('Arial', 15, 'bold'), background='white')
+                        label.grid(sticky='W', row=19, column=count4c, padx=10)
+                        count4c += 1
+
+                canvas = tk.Canvas(res_window, width=1250, height=2, bg="dark blue")
+                canvas.grid(sticky='W', row=20, column=0, columnspan=8, padx=10)
+                canvas.create_line(50, 100, 350, 100, fill="dark blue", width=3)
+
+                pos_diag = ctk.CTkLabel(res_window, text='Possible Diagnosis', font=('Arial', 25, 'bold'), bg_color='white')
+                pos_diag.grid(sticky='W', row=21, column=0, columnspan=2, padx=10, pady=20)
+
+                count5a = 0
+                count5b = 0
+                for items in list_l:
+                    if count5a < 6:
+                        label = tk.Label(res_window, text=items, font=('Arial', 15, 'bold'), background='white')
+                        label.grid(sticky='W', row=22, column=count5a, padx=10)
+                        count5a += 1
+                    elif count5b < 12:
+                        label = tk.Label(res_window, text=items, font=('Arial', 15, 'bold'), background='white')
+                        label.grid(sticky='W', row=23, column=count5b, padx=10)
+                        count5b += 1
+
+                canvas = tk.Canvas(res_window, width=1250, height=2, bg="dark blue")
+                canvas.grid(sticky='W', row=24, column=0, columnspan=8, padx=10)
+                canvas.create_line(50, 100, 350, 100, fill="dark blue", width=3)
+
+        def create_frame_1(parent):
+            frame = ctk.CTkFrame(parent, fg_color="#C9A0DC")
+            frame.grid(row=1, column=0, padx=5, pady=5, sticky="nsew")
+
+            def check_phone_exists(Phone_Number):
+                # Connect to Access Database
+                conn = pyodbc.connect(r'DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};'
+                                      r'DBQ=C:\Aiza-NED\Programming_Fundamentals\Eye_Clinic[1].accdb')
+                cursor = conn.cursor()
+
+                # SQL query to check if the phone number exists
+                query = "SELECT COUNT(*) FROM Per_Inf WHERE Phone_Number = ?"
+                cursor.execute(query, (Phone_Number,))
+                result = cursor.fetchone()
+                conn.close()
+
+                # If count > 0, phone number exists
+                return result[0] > 0
+
+            # if the function is not called the possible diagnosis will not be delivered
+            def enter():
+
+                # getting the values from the entry boxes and updating the dictionary
+                age = age_e.get()
+                dict['Age'] = str(age)
+
+                job = click.get()
+                dict['Job'] = str(job)
+
+                Address = add_e.get()
+                dict['Address'] = str(Address)
+
+                Phone_Number = num_e.get()
+                dict['Phone_Number'] = str(Phone_Number)
+
+                Name = name_e.get()
+
+                if check_phone_exists(Phone_Number):
+                    messagebox.showerror("Error", "Patient has previously visited.")
+                    return
+
+                Address = add_e.get()
+                dict['Address'] = str(Address)
+
+                if not Name or not Address or not Phone_Number:
+                    messagebox.showwarning("Input Error", "Please fill in all fields.")
+                    return
+
+                # inserting the information into the database
+                conn = pyodbc.connect((r'DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};'
+                                       r'DBQ=C:\Aiza-NED\Programming_Fundamentals\Eye_Clinic[1].accdb;'))
+
+                cur = conn.cursor()
+
+                try:
+                    cur.execute("INSERT INTO Per_Inf (Name, Address, Phone_Number) VALUES (?, ?, ?)",
+                                (Name, Address, Phone_Number))
+                    conn.commit()
+                    messagebox.showinfo("Success", "Data inserted successfully!")
+                except Exception as e:
+                    messagebox.showerror("Error", f"An error occurred: {e}")
+                finally:
+                    # Close connection
+                    cur.close()
+                    conn.close()
+
+            # setting and formatting the labels and other widgets
+            per_inf = ctk.CTkLabel(frame, text='     Personal        ', font=('Arial', 30))
+            per_inf.grid(sticky='W', row=1, column=2, columnspan=2, padx=10)
+            per_inf = ctk.CTkLabel(frame, text='     Information       ', font=('Arial', 30))
+            per_inf.grid(sticky='W', row=2, column=2, columnspan=2, padx=10, pady=10)
+
+            name_l = ctk.CTkLabel(frame, text='Name', font=('Arial', 20))
+            name_l.grid(sticky='W', row=2, column=0, padx=10, pady=10)
+            num_l = ctk.CTkLabel(frame, text='Phone Number', font=('Arial', 20))
+            num_l.grid(sticky='W', row=3, column=0, padx=10, pady=10)
+            add_l = ctk.CTkLabel(frame, text='Address', font=('Arial', 20))
+            add_l.grid(sticky='W', row=4, column=0, padx=10, pady=10)
+            age_l = ctk.CTkLabel(frame, text='Age', font=('Arial', 20))
+            age_l.grid(sticky='W', row=5, column=0, padx=10, pady=10)
+            occ_drop = ctk.CTkLabel(frame, text='Occupation', font=('Arial', 20))
+            occ_drop.grid(sticky='W', row=6, column=0, padx=10, pady=10)
+
+            click = tk.StringVar()
+            click.set('Tech related')
+
+            def job():
+                val = click.get()
+                dict['Job'] = val
+
+            job_l = ['Tech related', 'Finance', 'Industrial Worker', 'Engineer', 'Doctor', 'Social worker', 'other']
+
+            d4 = ctk.CTkOptionMenu(frame, values=job_l, font=('Arial', 20), dropdown_font=('Arial', 20))
+            d4.grid(row=6, column=1)
+
+            name_e = ctk.CTkEntry(frame, width=200)
+            name_e.grid(row=2, column=1, pady=5)
+            num_e = ctk.CTkEntry(frame, width=200)
+            num_e.grid(row=3, column=1, pady=5)
+            add_e = ctk.CTkEntry(frame, width=200)
+            add_e.grid(row=4, column=1, pady=5)
+            age_e = ctk.CTkEntry(frame, width=200)
+            age_e.grid(row=5, column=1, pady=5)
+
+            enter_b = ctk.CTkButton(frame, text='Submit Information', font=('Arial', 20), command=enter)
+            enter_b.grid(row=7, column=0, padx=10, pady=30)
+
+            return frame
+
+
+        def create_frame_2(parent):
+            frame = ctk.CTkFrame(parent, width=500, height=500, fg_color="#CCCCFF")
+            frame.grid(row=2, column=1, padx=5, pady=5, stick='nsew')
+
+            checkbox1_var = tk.IntVar()
+            checkbox2_var = tk.IntVar()
+            checkbox3_var = tk.IntVar()
+            checkbox4_var = tk.IntVar()
+            checkbox5_var = tk.IntVar()
+            checkbox6_var = tk.IntVar()
+            checkbox7_var = tk.IntVar()
+            checkbox8_var = tk.IntVar()
+
+            def mac_deg(val1):
+                # if the condition is true(checkbox check)
+                if checkbox1_var.get() == 1:
+                    # the value is appended into the list of the given key
+                    dict['Genetic'].append('Macular degeneration')
+                # if the condition is false(checkbox uncheck) and the value is present in the list
+                elif checkbox1_var.get() == 0 and 'Macular degeneration' in dict['Genetic']:
+                    # remove the value from the list
+                    dict['Genetic'].remove('Macular degeneration')
+                # print the dictionary to verify the changes
+                print(dict)
+
+            def dia_ret(val3):
+                if checkbox3_var.get() == 1:
+                    dict['Genetic'].append('Diabetic retinopathy')
+                elif checkbox3_var.get() == 0 and 'Diabetic retinopathy' in dict['Genetic']:
+                    dict['Genetic'].remove('Diabetic retinopathy')
+                print(dict)
+
+            def glau(val4):
+                if checkbox4_var.get() == 1:
+                    dict['Genetic'].append('Glaucoma')
+                elif checkbox4_var.get() == 0 and 'Glaucoma' in dict['Genetic']:
+                    dict['Genetic'].remove('Glaucoma')
+                print(dict)
+
+            def arth(val5):
+                if checkbox5_var.get() == 1:
+                    dict['Genetic'].append('Arthritis')
+                elif checkbox5_var.get() == 0 and 'Arthritis' in dict['Genetic']:
+                    dict['Genetic'].remove('Arthritis')
+                print(dict)
+
+            def nig_bli(val6):
+                if checkbox6_var.get() == 1:
+                    dict['Genetic'].append('Night blindness')
+                elif checkbox6_var.get() == 0 and 'Night blindness' in dict['Genetic']:
+                    dict['Genetic'].remove('Night blindness')
+                print(dict)
+
+            def diab(val7):
+                if checkbox7_var.get() == 1:
+                    dict['Genetic'].append('Diabetes')
+                elif checkbox7_var.get() == 0 and 'Diabetes' in dict['Genetic']:
+                    dict['Genetic'].remove('Diabetes')
+                print(dict)
+
+            def blo_pres(val8):
+                if checkbox8_var.get() == 1:
+                    dict['Genetic'].append('Blood Pressure')
+                elif checkbox8_var.get() == 0 and 'Blood Pressure' in dict['Genetic']:
+                    dict['Genetic'].remove('Blood Pressure')
+                print(dict)
+
+            # setting and formatting the labels and other widgets
+            empty = ctk.CTkLabel(frame, text='    ', font=('Arial', 30))
+            empty.grid(stick='W', row=0, column=0, padx=10, pady=5)
+
+            drug_his2 = ctk.CTkLabel(frame, text='       Family       ', font=('Arial', 30))
+            drug_his2.grid(stick='W', row=6, column=0, padx=10, pady=5)
+            drug_his3 = ctk.CTkLabel(frame, text='       History     ', font=('Arial', 30))
+            drug_his3.grid(stick='W', row=7, column=0, padx=10, pady=5)
+
+            med_l = ctk.CTkLabel(frame, text="       Q. Do the patient's parents have any of these diseases?",
+                                 font=('Arial', 20))
+            med_l.grid(stick='W', row=1, column=1, columnspan=2, rowspan=2, padx=10, pady=20)
+            emp_l = ctk.CTkLabel(frame, text='          ', font=('Arial', 15))
+            emp_l.grid(stick='W', row=2, column=1, rowspan=2, padx=10, pady=10)
+
+            md_c = ctk.CTkCheckBox(frame, text='Macular degeneration', variable=checkbox1_var,
+                                   command=lambda: mac_deg('Macular degeneration'), font=('Arial', 20))
+            md_c.grid(stick='W', row=4, column=1, padx=80, pady=10)
+            ca_c = ctk.CTkCheckBox(frame, text='Blood Pressure', variable=checkbox2_var,
+                                   command=lambda: blo_pres('Blood Pressure'),
+                                   font=('Arial', 20))
+            ca_c.grid(stick='W', row=5, column=1, padx=80, pady=10)
+            gl_c = ctk.CTkCheckBox(frame, text='Glaucoma', variable=checkbox4_var, command=lambda: glau('Glaucoma'),
+                                   font=('Arial', 20))
+            gl_c.grid(stick='W', row=5, column=2, pady=10)
+            ca_c = ctk.CTkCheckBox(frame, text='Arthritis', variable=checkbox5_var, command=lambda: arth('Arthritis'),
+                                   font=('Arial', 20))
+            ca_c.grid(stick='W', row=4, column=2, pady=10)
+            dr_c = ctk.CTkCheckBox(frame, text='Night blindness', variable=checkbox6_var,
+                                   command=lambda: nig_bli('Night blindness'), font=('Arial', 20))
+            dr_c.grid(stick='W', row=6, column=1, padx=80, pady=10)
+            re_c = ctk.CTkCheckBox(frame, text='Diabetes', variable=checkbox7_var, command=lambda: diab('Diabetes'),
+                                   font=('Arial', 20))
+            re_c.grid(stick='W', row=6, column=2, pady=10)
+
+            return frame
+
+
+        def create_frame_3(parent):
+            frame = ctk.CTkFrame(parent, width=500, height=500, fg_color="#B7A8D9")
+            frame.grid(row=2, column=0, padx=5, pady=5, sticky="nsew")
+
+            checkbox1_var = tk.IntVar()
+            checkbox2_var = tk.IntVar()
+            checkbox3_var = tk.IntVar()
+
+            def tuber(val1):
+                if checkbox1_var.get() == 1:
+                    dict['Medications'].append('Tuberculosis')
+                elif checkbox1_var.get() == 0 and 'Tuberculosis' in dict['Medications']:
+                    dict['Medications'].remove('Tuberculosis')
+                print(dict)
+
+            def arthr(val2):
+                if checkbox2_var.get() == 1:
+                    dict['Medications'].append('Arthralgia')
+                elif checkbox2_var.get() == 0 and 'Arthralgia' in dict['Medications']:
+                    dict['Medications'].remove('Arthralgia')
+                print(dict)
+
+            def alc_usa(val3):
+                if checkbox3_var.get() == 1:
+                    dict['Medications'].append('Alcohol Usage')
+                elif checkbox3_var.get() == 0 and 'Alcohol Usage' in dict['Medications']:
+                    dict['Medications'].remove('Alcohol Usage')
+                print(dict)
+
+            # setting and formatting the labels and other widgets
+            empty = ctk.CTkLabel(frame, text='    ', font=('Arial', 30))
+            empty.grid(stick='W', row=0, column=0, padx=10, pady=5)
+
+            drug_his = ctk.CTkLabel(frame, text=' Drug     ', font=('Arial', 30))
+            drug_his.grid(stick='W', row=4, column=1, padx=10)
+            drug_his2 = ctk.CTkLabel(frame, text=' History', font=('Arial', 30))
+            drug_his2.grid(stick='W', row=5, column=1, padx=10)
+            med_l = ctk.CTkLabel(frame, text='Q. What medications does the patient take?   ', font=('Arial', 20))
+            med_l.grid(stick='W', row=1, column=0, padx=10, pady=20)
+
+            tb_c = ctk.CTkCheckBox(frame, text='Tuberculosis', variable=checkbox1_var,
+                                   command=lambda: tuber('Tuberculosis'),
+                                   font=('Arial', 20))
+            tb_c.grid(stick='W', row=2, column=0, padx=40, pady=10)
+            ar_c = ctk.CTkCheckBox(frame, text='Arthralgia', variable=checkbox2_var,
+                                   command=lambda: arthr('Arthralgia'),
+                                   font=('Arial', 20))
+            ar_c.grid(stick='W', row=3, column=0, padx=40, pady=10)
+            au_c = ctk.CTkCheckBox(frame, text='Alcohol Usage', variable=checkbox3_var,
+                                   command=lambda: alc_usa('Alcohol Usage'),
+                                   font=('Arial', 20))
+            au_c.grid(stick='W', row=4, column=0, padx=40, pady=10)
+
+            return frame
+
+
+        def create_frame_4(parent):
+            frame = ctk.CTkFrame(parent, fg_color="#D8BFD8")
+            frame.grid(row=1, column=1, columnspan=2, padx=5, pady=5, sticky="nsew")
+
+            checkbox1_var = tk.IntVar()
+            checkbox2_var = tk.IntVar()
+            checkbox4_var = tk.IntVar()
+            checkbox8_var = tk.IntVar()
+            checkbox9_var = tk.IntVar()
+            checkbox10_var = tk.IntVar()
+            checkbox11_var = tk.IntVar()
+            checkbox12_var = tk.IntVar()
+
+            def blo_pre(val1):
+                if checkbox1_var.get() == 1:
+                    dict['Personal'].append('Blood Pressure')
+                elif checkbox1_var.get() == 0 and 'Blood Pressure' in dict['Personal']:
+                    dict['Personal'].remove('Blood Pressure')
+                print(dict)
+
+            def diabe(val2):
+                if checkbox2_var.get() == 1:
+                    dict['Personal'].append('Diabetes')
+                elif checkbox2_var.get() == 0 and 'Diabetes' in dict['Personal']:
+                    dict['Personal'].remove('Diabetes')
+                print(dict)
+
+            def hea_con(val4):
+                if checkbox4_var.get() == 1:
+                    dict['Personal'].append('Heart condition')
+                elif checkbox4_var.get() == 0 and 'Heart condition' in dict['Personal']:
+                    dict['Personal'].remove('Heart condition')
+                print(dict)
+
+            def alle(val8):
+                if checkbox8_var.get() == 1:
+                    dict['Personal'].append('Any Allergies')
+                elif checkbox8_var.get() == 0 and 'Any Allergies' in dict['Personal']:
+                    dict['Personal'].remove('Any Allergies')
+                print(dict)
+
+            def eye_sur(val9):
+                if checkbox9_var.get() == 1:
+                    dict['Personal'].append('Any eye surgery')
+                elif checkbox9_var.get() == 0 and 'Any eye surgery' in dict['Personal']:
+                    dict['Personal'].remove('Any eye surgery')
+                print(dict)
+
+            def gla_far(val10):
+                if checkbox10_var.get() == 1:
+                    dict['Personal'].append('Plus lens')
+                elif checkbox10_var.get() == 0 and 'Plus lens' in dict['Personal']:
+                    dict['Personal'].remove('Plus lens')
+                print(dict)
+
+            def gla_near(val11):
+                if checkbox11_var.get() == 1:
+                    dict['Personal'].append('Minus lens')
+                elif checkbox11_var.get() == 0 and 'Minus lens' in dict['Personal']:
+                    dict['Personal'].remove('Minus lens')
+                print(dict)
+
+            def gla_no(val12):
+                if checkbox12_var.get() == 1:
+                    dict['Personal'].append('No glasses')
+                elif checkbox12_var.get() == 0 and 'No glasses' in dict['Personal']:
+                    dict['Personal'].remove('No glasses')
+                print(dict)
+
+            # setting and formatting the labels and other widgets
+            drug_his = ctk.CTkLabel(frame, text='        Personal     ', font=('Arial', 30))
+            drug_his.grid(stick='W', row=1, column=0, columnspan=2, padx=10)
+            drug_his = ctk.CTkLabel(frame, text='         History         ', font=('Arial', 30))
+            drug_his.grid(stick='W', row=2, column=0, columnspan=2)
+            med_l = ctk.CTkLabel(frame, text='  Q. Does the patient have any of these?', font=('Arial', 20))
+            med_l.grid(stick='W', row=2, column=2, columnspan=2, padx=20, pady=10)
+
+            gn_c = ctk.CTkCheckBox(frame, text='Plus lens', variable=checkbox10_var,
+                                   command=lambda: gla_near('Plus lens'),
+                                   font=('Arial', 20))
+            gn_c.grid(stick='W', row=3, column=3, padx=45, pady=10)
+            gf_c = ctk.CTkCheckBox(frame, text='Minus lens', variable=checkbox11_var,
+                                   command=lambda: gla_near('Minus lens'),
+                                   font=('Arial', 20))
+            gf_c.grid(stick='W', row=4, column=3, padx=45, pady=10)
+            ng_c = ctk.CTkCheckBox(frame, text='No glasses', variable=checkbox12_var,
+                                   command=lambda: gla_near('No glasses'),
+                                   font=('Arial', 20))
+            ng_c.grid(stick='W', row=5, column=3, padx=45, pady=10)
+            di_c = ctk.CTkCheckBox(frame, text='Diabetes', variable=checkbox2_var, command=lambda: diabe('Diabetes'),
+                                   font=('Arial', 20))
+            di_c.grid(stick='W', row=7, column=3, padx=45, pady=10)
+            ht_c = ctk.CTkCheckBox(frame, text='Any heart condition', variable=checkbox4_var,
+                                   command=lambda: hea_con('Heart condition'), font=('Arial', 20))
+            ht_c.grid(stick='W', row=3, column=2, padx=60, pady=10)
+            alle_c = ctk.CTkCheckBox(frame, text='Any Allergies', variable=checkbox8_var,
+                                     command=lambda: alle('Any Allergies'),
+                                     font=('Arial', 20))
+            alle_c.grid(stick='W', row=4, column=2, padx=60, pady=10)
+            es_c = ctk.CTkCheckBox(frame, text='Any eye surgery', variable=checkbox9_var,
+                                   command=lambda: gla_far('Any eye surgery'), font=('Arial', 20))
+            es_c.grid(stick='W', row=5, column=2, padx=60, pady=10)
+            bp_c = ctk.CTkCheckBox(frame, text='Blood Pressure', variable=checkbox1_var,
+                                   command=lambda: blo_pre('Blood Pressure'), font=('Arial', 20))
+            bp_c.grid(stick='W', row=7, column=2, padx=60, pady=10)
+
+            first_image = CTkImage(light_image=Image.open(r"C:\project-PF\Front Desk_2.png"),
+                                   dark_image=Image.open(r"C:\project-PF\Front Desk_2.png"), size=(450, 300))
+            picture = CTkLabel(parent, text="", image=first_image)
+            picture.place(x=470, y=200)
+
+            return frame
+
+
+        def create_frame_5(parent):
+            frame5 = ctk.CTkFrame(parent)
+            frame5.grid(row=0, column=0, padx=5, pady=5, sticky="w")
+            frame5.configure(fg_color="#E3D9FF")
+
+            first_image = CTkImage(light_image=Image.open(r"C:\project-PF\pain.jpg"),
+                                   dark_image=Image.open(r"C:\project-PF\pain.jpg"), size=(350, 60))
+            picture = CTkLabel(frame5, text="", image=first_image)
+            picture.place(x=40, y=230)
+            second_image = CTkImage(light_image=Image.open(r"C:\project-PF\strip.png"),
+                                   dark_image=Image.open(r"C:\project-PF\strip.png"), size=(1525, 70))
+            picture = CTkLabel(frame5, text="", image=second_image)
+            picture.grid(row=14, column=1, columnspan=5)
+
+            checkbox1_var = tk.IntVar()
+            checkbox2_var = tk.IntVar()
+            checkbox3_var = tk.IntVar()
+            checkbox4_var = tk.IntVar()
+            checkbox5_var = tk.IntVar()
+            checkbox6_var = tk.IntVar()
+            checkbox7_var = tk.IntVar()
+            checkbox8_var = tk.IntVar()
+            checkbox9_var = tk.IntVar()
+            checkbox10_var = tk.IntVar()
+            checkbox11_var = tk.IntVar()
+            checkbox12_var = tk.IntVar()
+            checkbox13_var = tk.IntVar()
+            checkbox14_var = tk.IntVar()
+            checkbox15_var = tk.IntVar()
+            checkbox16_var = tk.IntVar()
+
+
+            def right(val15):
+                if checkbox15_var.get() == 1:
+                    dict['Eye'].append('Right eye')
+                elif checkbox15_var.get() == 0 and 'Right eye' in dict['Eye']:
+                    dict['Eye'].remove('Right eye')
+                print(dict)
+
+            def left(val16):
+                if checkbox16_var.get() == 1:
+                    dict['Eye'].append('Left eye')
+                elif checkbox16_var.get() == 0 and 'Left eye' in dict['Eye']:
+                    dict['Eye'].remove('Left eye')
+                print(dict)
+
+            def red(val1):
+                if checkbox1_var.get() == 1:
+                    dict['Complains'].append('Redness')
+                elif checkbox1_var.get() == 0 and 'Redness' in dict['Complains']:
+                    dict['Complains'].remove('Redness')
+                print(dict)
+
+            def water(val2):
+                if checkbox2_var.get() == 1:
+                    dict['Complains'].append('Watering')
+                elif checkbox2_var.get() == 0 and 'Watering' in dict['Complains']:
+                    dict['Complains'].remove('Watering')
+                print(dict)
+
+            def foc(val3):
+                if checkbox3_var.get() == 1:
+                    dict['Complains'].append('Fall of curtains')
+                elif checkbox3_var.get() == 0 and 'Fall of curtains' in dict['Complains']:
+                    dict['Complains'].remove('Fall of curtains')
+                print(dict)
+
+            def floa(val4):
+                if checkbox4_var.get() == 1:
+                    dict['Complains'].append('Floaters')
+                elif checkbox4_var.get() == 0 and 'Floaters' in dict['Complains']:
+                    dict['Complains'].remove('Floaters')
+                print(dict)
+
+            def sti_dis(val5):
+                if checkbox5_var.get() == 1:
+                    dict['Complains'].append('Sticky Discharge')
+                elif checkbox5_var.get() == 0 and 'Sticky Discharge' in dict['Complains']:
+                    dict['Complains'].remove('Sticky Discharge')
+                print(dict)
+
+            def clu(val6):
+                if checkbox6_var.get() == 1:
+                    dict['Complains'].append('Contact lens usage')
+                elif checkbox6_var.get() == 0 and 'Contact lens usage' in dict['Complains']:
+                    dict['Complains'].remove('Contact lens usage')
+                print(dict)
+
+            def fbs(val7):
+                if checkbox7_var.get() == 1:
+                    dict['Complains'].append('Foreign body')
+                elif checkbox7_var.get() == 0 and 'Foreign body' in dict['Complains']:
+                    dict['Complains'].remove('Foreign body')
+                print(dict)
+
+            def flov(val8):
+                if checkbox8_var.get() == 1:
+                    dict['Complains'].append('Sudden vision loss')
+                elif checkbox8_var.get() == 0 and 'Sudden vision loss' in dict['Complains']:
+                    dict['Complains'].remove('Sudden vision loss')
+                print(dict)
+
+            def slov(val9):
+                if checkbox9_var.get() == 1:
+                    dict['Complains'].append('Slow vision loss')
+                elif checkbox9_var.get() == 0 and 'Slow vision loss' in dict['Complains']:
+                    dict['Complains'].remove('Slow vision loss')
+                print(dict)
+
+            def cie(val10):
+                if checkbox10_var.get() == 1:
+                    dict['Complains'].append('Chemical in eye')
+                elif checkbox10_var.get() == 0 and 'Chemical in eye' in dict['Complains']:
+                    dict['Complains'].remove('Chemical in eye')
+                print(dict)
+
+            def head(val11):
+                if checkbox11_var.get() == 1:
+                    dict['Complains'].append('Headache')
+                elif checkbox11_var.get() == 0 and 'Headache' in dict['Complains']:
+                    dict['Complains'].remove('Headache')
+                print(dict)
+
+            def fla_lig(val12):
+                if checkbox12_var.get() == 1:
+                    dict['Complains'].append('Flashing light')
+                elif checkbox12_var.get() == 0 and 'Flashing light' in dict['Complains']:
+                    dict['Complains'].remove('Flashing light')
+                print(dict)
+
+            def dry_eye(val13):
+                if checkbox12_var.get() == 1:
+                    dict['Complains'].append('Dry Eye')
+                elif checkbox12_var.get() == 0 and 'Dry Eye' in dict['Complains']:
+                    dict['Complains'].remove('Dry Eye')
+                print(dict)
+
+            def nlov(val14):
+                if checkbox13_var.get() == 1:
+                    dict['Complains'].append('No vision loss')
+                elif checkbox13_var.get() == 0 and 'No vision loss' in dict['Complains']:
+                    dict['Complains'].remove('No vision loss')
+                print(dict)
+
+            # setting and formatting the labels and other widgets
+            comp = ctk.CTkLabel(frame5, text='Patient Complains', font=('Arial', 25))
+            comp.grid(stick='W', row=0, column=1, padx=10, pady=10)
+
+            eye_l = ctk.CTkLabel(frame5, text='Q. Which eye is the patient complaining of?', font=('Arial', 20))
+            eye_l.grid(stick='W', row=1, column=1, columnspan=3, padx=10, pady=10)
+            pain_l = ctk.CTkLabel(frame5, text='Q. Are you in pain?', font=('Arial', 20))
+            pain_l.grid(stick='W', row=3, column=1, columnspan=3, padx=10, pady=10)
+            comp_l = ctk.CTkLabel(frame5, text="Q. What are the patient's complaints?", font=('Arial', 20))
+            comp_l.grid(stick='W', row=9, column=1, columnspan=3, padx=10, pady=10)
+
+            red_c = ctk.CTkLabel(frame5, text='')
+            red_c.grid(stick='W', row=5, column=1, columnspan=3, padx=50, pady=10)
+            red_c = ctk.CTkLabel(frame5, text='')
+            red_c.grid(stick='W', row=6, column=1, columnspan=3, padx=50)
+            red_c = ctk.CTkLabel(frame5, text='')
+            red_c.grid(stick='W', row=7, column=1, columnspan=3, padx=50)
+            red_c = ctk.CTkLabel(frame5, text='')
+            red_c.grid(stick='W', row=13, column=1, columnspan=3, padx=50, pady=60)
+
+
+            right_l = ctk.CTkCheckBox(frame5, text='Right eye', variable=checkbox15_var, command=lambda: right('Right eye'), font=('Arial', 20))
+            right_l.grid(stick='W', row=2, column=1, columnspan=3, padx=50, pady=10)
+            left_l = ctk.CTkCheckBox(frame5, text='Left eye', variable=checkbox16_var, command=lambda: left('Left eye'), font=('Arial', 20))
+            left_l.grid(stick='W', row=2, column=2, columnspan=3, padx=50, pady=10)
+            red_c = ctk.CTkCheckBox(frame5, text='Redness', variable=checkbox1_var, command=lambda: red('Redness'),
+                                    font=('Arial', 20))
+            red_c.grid(stick='W', row=10, column=1, padx=40, pady=10)
+            wat_c = ctk.CTkCheckBox(frame5, text='Watering', variable=checkbox2_var, command=lambda: water('Watering'),
+                                    font=('Arial', 20))
+            wat_c.grid(stick='W', row=11, column=1, padx=40, pady=10)
+            head_c = ctk.CTkCheckBox(frame5, text='Headache', variable=checkbox11_var, command=lambda: head('Headache'),
+                                     font=('Arial', 20))
+            head_c.grid(stick='W', row=12, column=1, padx=40, pady=10)
+            flo_c = ctk.CTkCheckBox(frame5, text='Floaters', variable=checkbox4_var, command=lambda: floa('Floaters'),
+                                    font=('Arial', 20))
+            flo_c.grid(stick='W', row=11, column=5, padx=50, pady=10)
+            st_c = ctk.CTkCheckBox(frame5, text='Sticky Discharge', variable=checkbox5_var,
+                                   command=lambda: sti_dis('Sticky Discharge'), font=('Arial', 20))
+            st_c.grid(stick='W', row=10, column=2, padx=50, pady=10)
+            clu_c = ctk.CTkCheckBox(frame5, text='Contact lens usage', variable=checkbox6_var,
+                                    command=lambda: clu('Contact lens usage'), font=('Arial', 20))
+            clu_c.grid(stick='W', row=11, column=2, padx=50, pady=10)
+            fbs_c = ctk.CTkCheckBox(frame5, text='Foreign body', variable=checkbox7_var,
+                                    command=lambda: fbs('Foreign body'),
+                                    font=('Arial', 20))
+            fbs_c.grid(stick='W', row=12, column=2, padx=50, pady=10)
+            flov_c = ctk.CTkCheckBox(frame5, text='Sudden vision loss', variable=checkbox8_var,
+                                     command=lambda: flov('Sudden vision loss'), font=('Arial', 20))
+            flov_c.grid(stick='W', row=10, column=4, padx=50, pady=10)
+            slov_c = ctk.CTkCheckBox(frame5, text='Slow vision loss', variable=checkbox9_var,
+                                     command=lambda: slov('Slow vision loss'), font=('Arial', 20))
+            slov_c.grid(stick='W', row=11, column=4, padx=50, pady=10)
+            cie_c = ctk.CTkCheckBox(frame5, text='Chemical in eye', variable=checkbox10_var,
+                                    command=lambda: cie('Chemical in eye'), font=('Arial', 20))
+            cie_c.grid(stick='W', row=11, column=3, padx=50, pady=10)
+            foc_c = ctk.CTkCheckBox(frame5, text='Fall of curtains', variable=checkbox3_var,
+                                    command=lambda: foc('Fall of curtains'), font=('Arial', 20))
+            foc_c.grid(stick='W', row=12, column=3, padx=50, pady=10)
+            fl_c = ctk.CTkCheckBox(frame5, text='Flashing light', variable=checkbox12_var,
+                                   command=lambda: fla_lig('Flashing light'), font=('Arial', 20))
+            fl_c.grid(stick='W', row=10, column=3, padx=50, pady=10)
+            dr_c = ctk.CTkCheckBox(frame5, text='Dry Eye', variable=checkbox13_var,
+                                   command=lambda: dry_eye('Dry Eye'), font=('Arial', 20))
+            dr_c.grid(stick='W', row=10, column=5, padx=50, pady=10)
+            nv_c = ctk.CTkCheckBox(frame5, text='No vision loss', variable=checkbox14_var,
+                                   command=lambda: nlov('No vision loss'), font=('Arial', 20))
+            nv_c.grid(stick='W', row=12, column=4, padx=50, pady=10)
+
+            # Using the slider to determine the pain scale rating
+            def slider(value):
+                dict['Pain'].pop()
+                dict['Pain'].append(round(value))
+                print(dict['Pain'])
+
+            hor_s = ctk.CTkSlider(frame5, from_=1, to=5, width=350, command=slider)
+            hor_s.place(x=40, y=200)
+
+            return frame5
+
+        def create_frame_6(parent):
+            frame6 = ctk.CTkFrame(parent)
+            frame6.grid(row=1, column=1, padx=200, pady=21.5, sticky="w")
+            frame6.configure(fg_color="#E3D9FF")
+
+            # submit button to call the final result window with complete patient information
+            # and potential diagnosis list
+            submit_button = ctk.CTkButton(frame6, text="SUBMIT", font=('Arial', 20), command=result)
+            exit_button = ctk.CTkButton(frame6, text="EXIT", font=('Arial', 20), command=sys.exit)
+            empty = ctk.CTkLabel(frame6, text="                                       ")
+
+
+            submit_button.grid(row=9, column=1, padx=50)
+            exit_button.grid(row=9, column=2, padx=50)
+            empty.grid(row=9, column=0, padx=300)
+
+            return frame6
+
+
+        def setup_frames(root):
+            global page1, page2
+
+            # Create page containers as frames
+            page1 = ctk.CTkFrame(m, fg_color="#E3D9FF")
+            page2 = ctk.CTkFrame(m,fg_color="#E3D9FF")
+
+            # Add four frames on the first page (2x2 grid)
+            create_frame_1(page1).grid(row=0, column=0, padx=20, pady=10, sticky="w")
+            create_frame_2(page1).grid(row=1, column=1, columnspan=3, padx=20, pady=10)
+            create_frame_3(page1).grid(row=1, column=0, padx=20, pady=10, sticky="nsew")
+            create_frame_4(page1).grid(row=0, column=1, columnspan=3, padx=20, pady=10, sticky="nsew")
+
+            # Add two frames on the second page
+            create_frame_5(page2).grid(row=0, column=0, columnspan=2)
+            create_frame_6(page2).grid(row=1, column=1)
+
+            prev_button = ctk.CTkButton(root, text="PREVIOUS", font=('Arial', 20), command=show_page1)
+            next_button = ctk.CTkButton(root, text="NEXT", font=('Arial', 20), command=show_page2)
+            prev_button.place(x=200, y=730)
+            next_button.place(x=450, y=730)
+
+        # Function to show the first page
+        def show_page1():
+            global page1, page2
+
+            page2.grid_forget()  # Hide page2
+            page1.grid(row=0, column=0)
+
+        # Function to show the second page
+        def show_page2():
+            global page1, page2
+
+            page1.grid_forget()  # Hide page1
+            page2.grid(row=0, column=0)  # Show page2
+
+        setup_frames(m)
+
+        show_page1()
+
+    else:
+        messagebox.showwarning("Input Error", "INCORRECT PASSWORD")
+
+# setting up the labels and other widgets on the screen
+first_image = CTkImage(light_image=Image.open(r"C:\project-PF\secondpic.png"),
+              dark_image=Image.open(r"C:\project-PF\secondpic.png"),size=(600, 450))
+picture=CTkLabel(m, text="", image=first_image)
+picture.place(x=100, y=100)
+my_font = ctk.CTkFont(family="Arial", size=50, weight="bold")
+lb1 = CTkLabel(m, text="The Ophthalmologist", font=my_font, text_color="black")
+lb1.place(x=800,y=170)
+lb2 = CTkLabel(m, text="Enter password", font=("Arial",20), text_color="black")
+lb2.place(x=800, y=270)
+txt1 = CTkEntry(m, width=250, show="*")
+txt1.place(x=800,y=310)
+btn1 = CTkButton(m, text="Log In", width=180, height=50, fg_color="black", font=("Arial", 20), command=new_window)
+btn1.place(x=800, y=380)
+
+m.mainloop()
+
+
